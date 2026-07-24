@@ -81,22 +81,33 @@
     let globalData = [];
     let currentPeriod = 'daily';
 
-    const DATA_URL = 'https://raw.githubusercontent.com/susumu53/adult-video-heat-ranking/main/data/rankings.json';
+    const DATA_URL_CDN = 'https://cdn.jsdelivr.net/gh/susumu53/adult-video-heat-ranking@main/data/rankings.json';
+    const DATA_URL_RAW = 'https://raw.githubusercontent.com/susumu53/adult-video-heat-ranking/main/data/rankings.json';
 
     async function loadHeatData() {
       try {
-        const res = await fetch(DATA_URL + '?t=' + Date.now());
+        let res;
+        try {
+          res = await fetch(DATA_URL_CDN + '?t=' + Date.now());
+        } catch (e) {
+          res = await fetch(DATA_URL_RAW + '?t=' + Date.now());
+        }
+
+        if (!res || !res.ok) {
+          res = await fetch(DATA_URL_RAW + '?t=' + Date.now());
+        }
+
         const data = await res.json();
         globalData = data.items || [];
         
         if (data.updated_at) {
           const date = new Date(data.updated_at);
-          document.getElementById('heat-updated-at').innerText = '更新: ' + date.getMonth() + 1 + '/' + date.getDate() + ' ' + String(date.getHours()).padStart(2,'0') + ':' + String(date.getMinutes()).padStart(2,'0');
+          document.getElementById('heat-updated-at').innerText = '更新: ' + (date.getMonth() + 1) + '/' + date.getDate() + ' ' + String(date.getHours()).padStart(2,'0') + ':' + String(date.getMinutes()).padStart(2,'0');
         }
         
         window.renderHeatRankings();
       } catch (err) {
-        document.getElementById('heat-ranking-list').innerHTML = '<div style="color:#ef4444; font-size:0.85rem;">データの読み込みに失敗しました。</div>';
+        document.getElementById('heat-ranking-list').innerHTML = '<div style="color:#ef4444; font-size:0.85rem;">データ取得中です。少々お待ちください。（数分後に自動反映されます）</div>';
       }
     }
 
