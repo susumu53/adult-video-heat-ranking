@@ -2,11 +2,11 @@
 
 > **For Antigravity:** REQUIRED WORKFLOW: Use `.agent/workflows/execute-plan.md` to execute this plan in single-flow mode.
 
-**Goal:** Build a 6-site adult video heat ranking aggregator that tracks daily/weekly/monthly/yearly view surges, runs on GitHub Actions, and deploys to GitHub Pages for free.
+**Goal:** Build a 6-site adult video heat ranking aggregator that tracks daily/weekly/monthly/yearly view surges, runs on GitHub Actions, and deploys to GitHub Pages for free, specifically integrated for web distribution on Livedoor Blog (`https://kanetu.doorblog.jp/`).
 
-**Architecture:** A lightweight batch pipeline written in Node.js/Python fetches trending video metadata from 6 target sites (Pornhub, XVideos, SpankBang, TokyoMotion, FC2, MissAV) every 6 hours via GitHub Actions. It calculates differential view surges (heat scores) against historical snapshots in `data/` and publishes a static JSON file. A responsive React/Vite dark-mode web application hosted on GitHub Pages reads `data/rankings.json` and renders the heat rankings with period/site filters.
+**Architecture:** A lightweight batch pipeline written in Node.js/Python fetches trending video metadata from 6 target sites (Pornhub, XVideos, SpankBang, TokyoMotion, FC2, MissAV) every 6 hours via GitHub Actions. It calculates differential view surges (heat scores) against historical snapshots in `data/` and publishes a static JSON file. A responsive React/Vite dark-mode web application and embeddable Livedoor Blog widget hosted on GitHub Pages reads `data/rankings.json` and renders the heat rankings with period/site filters directly on `https://kanetu.doorblog.jp/`.
 
-**Tech Stack:** JavaScript / Node.js (Scraper & Scorer), React + Vite (Web UI), HTML5 / Vanilla CSS3 (Styling), GitHub Actions (Cron & Automation), GitHub Pages (Hosting).
+**Tech Stack:** JavaScript / Node.js (Scraper & Scorer), React + Vite (Web UI & Embed Widget), HTML5 / Vanilla CSS3 (Styling), GitHub Actions (Cron & Automation), GitHub Pages & Livedoor Blog (Distribution).
 
 ---
 

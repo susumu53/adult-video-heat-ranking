@@ -31,9 +31,10 @@ Pornhub, XVideos, SpankBang（世界トレンド）および TokyoMotion, FC2動
   - 1日4回（6時間間隔）`cron: '0 */6 * * *'` でPython/Node.jsクローラーを自働起動。
   - 各サイトから上位500件のメタデータを取得し、過去データとの時系列差分を計算。
   - 結果を `data/rankings.json` および `data/history/` に保存し、自動 `git commit & push`。
-- **Webフロントエンド (GitHub Pages)**:
-  - Vite + React + Vanilla CSS (または HTML/JS) によるモダンな超高速レスポンシブWeb UI。
-  - `data/rankings.json` を非同期読み込みし、爆速で表示。
+- **Webフロントエンド & 配信 (GitHub Pages -> Livedoor Blog)**:
+  - Vite + React + Vanilla CSS によるレスポンシブWeb UIおよび埋め込みウィジェット/iframe用画面。
+  - 配信ターゲットであるライブドアブログ `https://kanetu.doorblog.jp/` の自由カスタマイズ（フリーエリア / プラグイン / 記事本文）にシームレスに組み込める埋め込みスクリプト・iframe対応コンポーネントを標準提供。
+  - `data/rankings.json` を非同期読み込みし、`kanetu.doorblog.jp` 上で超高速な過熱感ランキングを表示。
 
 ---
 
