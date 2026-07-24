@@ -1,4 +1,4 @@
-name: Scheduled Data Fetch & Deploy to GitHub Pages
+name: Scheduled Data Fetcher (Livedoor Blog Backend)
 
 on:
   schedule:
@@ -7,11 +7,9 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 jobs:
-  fetch-and-deploy:
+  fetch-and-commit:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -29,24 +27,10 @@ jobs:
       - name: Fetch Latest Video Heat Data
         run: npm run fetch-data
 
-      - name: Build Static App
-        run: npm run build
-
-      - name: Commit Updated Data
+      - name: Commit Updated Data to Main Branch
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/rankings.json
+          git add data/rankings.json public/data/rankings.json
           git diff --quiet && git diff --staged --quiet || git commit -m "chore(data): update video heat rankings [skip ci]"
-          git push
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload Artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './dist'
-
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
+          git push origin main

@@ -1,0 +1,166 @@
+<!-- ================================================================= -->
+<!-- ライブドアブログ (kanetu.doorblog.jp) 用 動画過熱感ランキングパーツ -->
+<!-- フリーエリア・プラグイン・カスタムHTMLにそのまま貼り付けて使用できます -->
+<!-- ================================================================= -->
+
+<div id="heat-ranking-app" style="background:#090d16; color:#f1f5f9; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; padding:15px; border-radius:12px; border:1px solid #1e293b; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+  <!-- ヘッダー -->
+  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #1e293b; padding-bottom:10px; margin-bottom:15px;">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span style="font-size:1.5rem;">🔥</span>
+      <h3 style="margin:0; font-size:1.2rem; background:linear-gradient(135deg,#ff2a6d,#00f5ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight:bold;">
+        動画過熱感ランキング
+      </h3>
+    </div>
+    <div id="heat-updated-at" style="font-size:0.75rem; color:#94a3b8;">データ取得中...</div>
+  </div>
+
+  <!-- フィルターコントロール -->
+  <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:15px; justify-content:space-between;">
+    <!-- 期間切替ボタン -->
+    <div style="display:flex; gap:4px;">
+      <button class="heat-period-btn active" data-period="daily" onclick="switchHeatPeriod('daily', this)">24h急増</button>
+      <button class="heat-period-btn" data-period="weekly" onclick="switchHeatPeriod('weekly', this)">7日間</button>
+      <button class="heat-period-btn" data-period="monthly" onclick="switchHeatPeriod('monthly', this)">30日間</button>
+      <button class="heat-period-btn" data-period="yearly" onclick="switchHeatPeriod('yearly', this)">年間</button>
+    </div>
+
+    <!-- サイト切替セレクトボックス -->
+    <select id="heat-site-select" onchange="renderHeatRankings()" style="background:#1e293b; color:#fff; border:1px solid #334155; border-radius:6px; padding:4px 8px; font-size:0.85rem; cursor:pointer;">
+      <option value="all">全サイト (横断)</option>
+      <option value="Pornhub">Pornhub</option>
+      <option value="XVideos">XVideos</option>
+      <option value="SpankBang">SpankBang</option>
+      <option value="TokyoMotion">TokyoMotion (日本UGC)</option>
+      <option value="FC2動画">FC2動画 (素人/個撮)</option>
+      <option value="MissAV">MissAV (JAV)</option>
+    </select>
+  </div>
+
+  <!-- ランキングリスト容器 -->
+  <div id="heat-ranking-list" style="display:grid; gap:12px;"></div>
+</div>
+
+<style>
+  .heat-period-btn {
+    background: rgba(255,255,255,0.05);
+    color: #94a3b8;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+  .heat-period-btn.active {
+    background: linear-gradient(135deg, #ff2a6d, #ff5e00);
+    color: #ffffff;
+    border-color: #ff2a6d;
+  }
+  .heat-card {
+    background: #121827;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .heat-card:hover {
+    transform: translateY(-2px);
+    border-color: #ff2a6d;
+  }
+</style>
+
+<script>
+  (function() {
+    let globalData = [];
+    let currentPeriod = 'daily';
+
+    const DATA_URL = 'https://raw.githubusercontent.com/susumu53/adult-video-heat-ranking/main/data/rankings.json';
+
+    async function loadHeatData() {
+      try {
+        const res = await fetch(DATA_URL + '?t=' + Date.now());
+        const data = await res.json();
+        globalData = data.items || [];
+        
+        if (data.updated_at) {
+          const date = new Date(data.updated_at);
+          document.getElementById('heat-updated-at').innerText = '更新: ' + date.getMonth() + 1 + '/' + date.getDate() + ' ' + String(date.getHours()).padStart(2,'0') + ':' + String(date.getMinutes()).padStart(2,'0');
+        }
+        
+        window.renderHeatRankings();
+      } catch (err) {
+        document.getElementById('heat-ranking-list').innerHTML = '<div style="color:#ef4444; font-size:0.85rem;">データの読み込みに失敗しました。</div>';
+      }
+    }
+
+    window.switchHeatPeriod = function(period, btn) {
+      currentPeriod = period;
+      document.querySelectorAll('.heat-period-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      window.renderHeatRankings();
+    };
+
+    window.renderHeatRankings = function() {
+      const selectedSite = document.getElementById('heat-site-select').value;
+      const container = document.getElementById('heat-ranking-list');
+      
+      let items = globalData.filter(item => {
+        if (selectedSite !== 'all' && item.site !== selectedSite) return false;
+        return true;
+      });
+
+      items.sort((a, b) => {
+        if (currentPeriod === 'daily') return b.daily_delta - a.daily_delta;
+        if (currentPeriod === 'weekly') return b.weekly_delta - a.weekly_delta;
+        if (currentPeriod === 'monthly') return b.monthly_delta - a.monthly_delta;
+        return b.yearly_delta - a.yearly_delta;
+      });
+
+      const topItems = items.slice(0, 15);
+
+      if (topItems.length === 0) {
+        container.innerHTML = '<div style="color:#94a3b8; font-size:0.85rem;">対象データがありません。</div>';
+        return;
+      }
+
+      container.innerHTML = topItems.map((item, idx) => {
+        let rankBadgeStyle = 'background:#1e293b; color:#fff;';
+        if (idx === 0) rankBadgeStyle = 'background:gold; color:#000;';
+        else if (idx === 1) rankBadgeStyle = 'background:silver; color:#000;';
+        else if (idx === 2) rankBadgeStyle = 'background:#cd7f32; color:#fff;';
+
+        let deltaVal = item.daily_delta;
+        let suffix = '/24h';
+        if (currentPeriod === 'weekly') { deltaVal = item.weekly_delta; suffix = '/7d'; }
+        if (currentPeriod === 'monthly') { deltaVal = item.monthly_delta; suffix = '/30d'; }
+        if (currentPeriod === 'yearly') { deltaVal = item.yearly_delta; suffix = '/1y'; }
+
+        return `
+          <a class="heat-card" href="${item.url}" target="_blank" rel="noopener noreferrer">
+            <div style="font-weight:800; font-size:0.9rem; padding:4px 8px; border-radius:4px; ${rankBadgeStyle}">#${idx + 1}</div>
+            <img src="${item.thumbnail}" alt="" style="width:100px; aspect-ratio:16/9; object-fit:cover; border-radius:4px; background:#000;" />
+            <div style="flex-grow:1; min-width:0;">
+              <div style="font-size:0.7rem; color:#00f5ff; font-weight:bold; text-transform:uppercase;">${item.site}</div>
+              <div style="font-size:0.85rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.title}</div>
+              <div style="font-size:0.75rem; color:#94a3b8; margin-top:2px;">
+                累計: ${(item.views/1000).toFixed(1)}k <span style="color:#ff2a6d; font-weight:bold; margin-left:8px;">+${(deltaVal/1000).toFixed(1)}k ${suffix}</span>
+              </div>
+            </div>
+            <div style="background:rgba(255,42,109,0.15); color:#ff2a6d; font-size:0.75rem; font-weight:bold; padding:4px 8px; border-radius:4px; white-space:nowrap;">
+              🔥 ${item.heat_score}
+            </div>
+          </a>
+        `;
+      }).join('');
+    };
+
+    loadHeatData();
+  })();
+</script>
