@@ -1,12 +1,13 @@
 import fs from 'fs';
 import path from 'path';
-import { generateMockData } from './scrapers/mock-fetcher.js';
+import { fetchRealAllSites } from './scrapers/real-fetcher.js';
 
-const items = generateMockData();
-const payload = {
-  updated_at: new Date().toISOString(),
-  items: items.sort((a, b) => b.heat_score - a.heat_score)
-};
+async function main() {
+  const items = await fetchRealAllSites();
+  const payload = {
+    updated_at: new Date().toISOString(),
+    items: items.sort((a, b) => b.heat_score - a.heat_score)
+  };
 
 const targets = [
   path.resolve('data/rankings.json'),
@@ -23,3 +24,6 @@ targets.forEach(outPath => {
 });
 
 console.log(`Saved ${items.length} items to ${targets.length} output paths.`);
+}
+
+main();
