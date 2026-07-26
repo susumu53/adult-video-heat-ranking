@@ -24,13 +24,16 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Install Playwright Chromium Browser
+        run: npx playwright install --with-deps chromium
+
       - name: Fetch Latest Video Heat Data
         run: npm run fetch-data
 
-      - name: Commit Updated Data to Main Branch
+      - name: Commit Updated Data & History to Main Branch
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/rankings.json public/data/rankings.json
-          git diff --quiet && git diff --staged --quiet || git commit -m "chore(data): update video heat rankings [skip ci]"
+          git add data/rankings.json public/data/rankings.json data/history/
+          git diff --quiet && git diff --staged --quiet || git commit -m "chore(data): update video heat rankings and daily history [skip ci]"
           git push origin main
